@@ -1,26 +1,12 @@
 
-
+import React, { useState, useEffect } from 'react';
 import Header from "../Header";
 import Footer from "../Footer";
 import Card from "../UI/Card/Card";
 import "./style.scss";
-import React, { useState, useEffect } from 'react';
 
-import md5 from 'crypto-js/md5'; // импортируем md5 из библиотеки crypto-js
-import axios from 'axios';
+import getAPI from "../../service/post";
 
-
-
-const API_URL = 'https://api.valantis.store:41000/';
-
-const generateAuthString = () => {
-  const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
-  return `${"Valantis"}_${timestamp}`;
-};
-
-const calculateMD5 = (str) => {
-  return md5(str).toString();
-};
 
 
 const index = () => {
@@ -29,47 +15,27 @@ const index = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
 
+
     const getID = async (offset) => {
-  
-  
-      const authString = generateAuthString();
-      const authHeader = { 'X-Auth': calculateMD5(authString) };
-    
+
       const requestBody = {
         action: "get_ids",
         params: {offset, limit: 50}
-    
       };
     
       try {
-    
-        const response = await axios.post(API_URL, requestBody, {
-          headers: {
-            ...authHeader,
-            'Content-Type': 'application/json',
-          },
-        });
-    
-        const data = response?.data;  
-        
+        const response = await getAPI.getID(requestBody);
+        const data = response?.data;   
         getData(data?.result)
     
-       
       } catch (error) {
         console.error('Произошла ошибка при отправке запроса:', error);
       }
     };
     
-    
 
-    
-    
     const getData = async (data) => {
-    
-     
-      const authString = generateAuthString();
-      const authHeader = { 'X-Auth': calculateMD5(authString) };
-    
+        
       const requestBody = {
         action: "get_items",
         params: {ids: data}
@@ -77,14 +43,8 @@ const index = () => {
       };
     
       try {
-        setLoading(true);
-        const response = await axios.post(API_URL, requestBody, {
-          headers: {
-            ...authHeader,
-            'Content-Type': 'application/json',
-          },
-        });
-    
+          setLoading(true);
+          const response = await getAPI.getData(requestBody);
           const data = response?.data;
           setDatas(data.result);
           
@@ -101,12 +61,12 @@ const index = () => {
   
     useEffect(() => {
         const fetchData = async () => {
-          await getID((currentPage - 1) * 50 + 1);
-            
+           await getID((currentPage - 1) * 50 + 1);
           };
       
           fetchData();
     }, [currentPage]);
+
   return (
     <>
         <Header/>

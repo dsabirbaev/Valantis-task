@@ -2,7 +2,6 @@
 
 import api from "../axios";
 
-
 import md5 from 'crypto-js/md5'; 
 
 const generateAuthString = () => {
@@ -23,9 +22,11 @@ const headers = {
     'Content-Type': 'application/json',
 }
 
+
+
 const getAPI = {
-    getID: async () => api.post('/posts'),
-    getOneItem: async (id) => api.get(`/posts/${id}`)
+    getID: async (data) => api.post(" ", data, { headers }),
+    getData: async (data) => api.post(" ", data, { headers })
 }
 
-export default postAPI;
+export default getAPI;
