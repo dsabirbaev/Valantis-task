@@ -26,8 +26,10 @@ const index = () => {
       try {
         const response = await getAPI.getID(requestBody);
         const data = response?.data;   
-        getData(data?.result)
-    
+        const res = new Set(data?.result);
+        const resArray = Array.from(res);
+        getData(resArray)
+        
       } catch (error) {
         console.error('Произошла ошибка при отправке запроса:', error);
       }
