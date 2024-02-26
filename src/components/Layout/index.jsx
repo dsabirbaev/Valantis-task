@@ -14,8 +14,9 @@ const index = () => {
     const[datas, setDatas] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
-
-
+    const [brand, setBrand] = useState([]);
+    const [selectedBrand, setSelectedBrand] = useState('Brands'); 
+    
     const getID = async (offset) => {
 
       const requestBody = {
@@ -57,9 +58,56 @@ const index = () => {
       }
     };
 
+
+    const getFields = async () => {
+        
+      const requestBody = {
+        action: "get_fields",
+        params: {field: "brand"}
+    
+      };
+    
+      try {
+          
+          const response = await getAPI.getField(requestBody);
+          const data = response?.data;
+          const filterData = new Set(data?.result);
+          const filterDatatoArr = Array.from(filterData);
+          setBrand(filterDatatoArr);
+      } catch (error) {
+        console.error('Произошла ошибка при отправке запроса:', error);
+       
+      }
+    };
+
+
+    const getFilter = async (data) => {
+      
+      const requestBody = {
+        action: "filter",
+        params: {brand: data == "No brand" ? null : data}
+    
+      };
+      setSelectedBrand(data);
+     
+      try {
+          
+          const response = await getAPI.getFilter(requestBody);
+          const data = response?.data;
+          
+          getData(data?.result);
+          
+      } catch (error) {
+        console.error('Произошла ошибка при отправке запроса:', error);
+        
+      }
+    };
+
     const handlePageChange = (newPage) => {
       setCurrentPage(newPage);
     };
+
+
   
     useEffect(() => {
         const fetchData = async () => {
@@ -67,6 +115,8 @@ const index = () => {
           };
       
           fetchData();
+          getFields();
+          
     }, [currentPage]);
 
   return (
@@ -81,7 +131,22 @@ const index = () => {
                         <span className="loader"></span>
                       </p>
                     ): (
-                      <div> 
+                      <div>  
+                            <div className='brand'>
+                              <span></span>
+
+                              <select name="brand" id="brand" className='brand-select' onChange={(e) => getFilter(e.target.value)}>
+                                <option value="Brands">{selectedBrand}</option>
+                                {
+                                  brand?.map((item, index) => (
+                                    <option  value={item} key={index}>{item == null ? "No brand" : item}</option>
+                                  ))
+                                }
+                                  
+                                  
+                              </select>
+                            </div>
+
                             <div className="card-wrapper">
                                 {datas.map((item, index) => (
                                     <Card key={index} data={item}/>

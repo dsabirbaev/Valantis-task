@@ -26,7 +26,9 @@ const headers = {
 
 const getAPI = {
     getID: async (data) => api.post(" ", data, { headers }),
-    getData: async (data) => api.post(" ", data, { headers })
+    getData: async (data) => api.post(" ", data, { headers }),
+    getField: async (data) => api.post(" ", data, { headers }),
+    getFilter: async (data) => api.post(" ", data, { headers }),
 }
 
 export default getAPI;
