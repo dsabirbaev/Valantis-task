@@ -15,8 +15,10 @@ const index = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [brand, setBrand] = useState([]);
+    const [price, setPrice] = useState([]);
     const [selectedBrand, setSelectedBrand] = useState('Brands'); 
-    
+    const [selectedPrice, setSelectedPrice] = useState('Prices'); 
+
     const getID = async (offset) => {
 
       const requestBody = {
@@ -59,11 +61,11 @@ const index = () => {
     };
 
 
-    const getFields = async () => {
+    const getFields = async (fieldType) => {
         
       const requestBody = {
         action: "get_fields",
-        params: {field: "brand"}
+        params: {field: fieldType}
     
       };
     
@@ -71,9 +73,17 @@ const index = () => {
           
           const response = await getAPI.getField(requestBody);
           const data = response?.data;
-          const filterData = new Set(data?.result);
-          const filterDatatoArr = Array.from(filterData);
-          setBrand(filterDatatoArr);
+
+          if (fieldType === "brand") {
+            const filterData = new Set(data?.result);
+            const filterDatatoArr = Array.from(filterData);
+            setBrand(filterDatatoArr);
+          } else if (fieldType === "price") {
+            const filterData = new Set(data?.result);
+            const filterDatatoArr = Array.from(filterData);
+            setPrice(filterDatatoArr);
+          }
+          
       } catch (error) {
         console.error('Произошла ошибка при отправке запроса:', error);
        
@@ -81,20 +91,20 @@ const index = () => {
     };
 
 
-    const getFilter = async (data) => {
+    const getFilterBrand = async (data) => {
+
       
       const requestBody = {
         action: "filter",
-        params: {brand: data == "No brand" ? null : data}
-    
+        params: { brand: data === "No brand" ? null : data }
       };
-      setSelectedBrand(data);
+      setSelectedBrand(data) 
+      
      
       try {
           
           const response = await getAPI.getFilter(requestBody);
           const data = response?.data;
-          
           getData(data?.result);
           
       } catch (error) {
@@ -103,9 +113,32 @@ const index = () => {
       }
     };
 
+
+
+    const getFilterPrice = async (data) => {
+
+      const requestBody = {
+        action: "filter",
+        params: { price: Number(data) }
+      };
+      setSelectedPrice(data) 
+      
+      try {
+          const response = await getAPI.getFilter(requestBody);
+          const data = response?.data;
+          getData(data?.result);
+          
+      } catch (error) {
+        console.error('Произошла ошибка при отправке запроса:', error);  
+      }
+
+    };
+
+
     const handlePageChange = (newPage) => {
       setCurrentPage(newPage);
     };
+
 
 
   
@@ -115,8 +148,8 @@ const index = () => {
           };
       
           fetchData();
-          getFields();
-          
+          getFields("brand");
+          getFields("price");
     }, [currentPage]);
 
   return (
@@ -133,17 +166,24 @@ const index = () => {
                     ): (
                       <div>  
                             <div className='brand'>
-                              <span></span>
+                              <select name="price" id="price" className='brand-select' onChange={(e) => getFilterPrice(e.target.value)} >
+                                <option value="Prices">{selectedPrice}</option>
+                                {
+                                  price?.sort((a, b) => a - b).map((item, index) => (
+                                    <option  value={item} key={index}>{item}</option>
+                                  ))
+                                }
+          
+                              </select>
 
-                              <select name="brand" id="brand" className='brand-select' onChange={(e) => getFilter(e.target.value)}>
+                              <select name="brand" id="brand" className='brand-select' onChange={(e) => getFilterBrand(e.target.value)}>
                                 <option value="Brands">{selectedBrand}</option>
                                 {
                                   brand?.map((item, index) => (
                                     <option  value={item} key={index}>{item == null ? "No brand" : item}</option>
                                   ))
                                 }
-                                  
-                                  
+          
                               </select>
                             </div>
 
